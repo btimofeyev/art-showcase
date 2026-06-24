@@ -1,15 +1,14 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useRef, useState } from "react";
+import { useId, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
 export function UploadForm() {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const cameraInputRef = useRef<HTMLInputElement>(null);
+  const fileInputId = useId();
 
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -41,7 +40,7 @@ export function UploadForm() {
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!file) {
-      setError("Choose or take a photo first");
+      setError("Choose an image first");
       return;
     }
 
@@ -83,132 +82,121 @@ export function UploadForm() {
       <div>
         <h2 className="text-base font-medium text-stone-900">Upload artwork</h2>
         <p className="mt-1 text-sm text-stone-600">
-          Take a photo or choose one from your library, then share it to the gallery.
+          Pick an image, add a title if you want, and upload it to the gallery.
         </p>
       </div>
 
-      {!file ? (
-        <div className="grid gap-3 sm:grid-cols-2">
-          <Button type="button" onClick={() => cameraInputRef.current?.click()}>
-            Take photo
-          </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => fileInputRef.current?.click()}
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {!file ? (
+          <label
+            htmlFor={fileInputId}
+            className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-stone-300 bg-stone-50 px-4 py-8 text-center transition-colors hover:border-accent hover:bg-accent/5"
           >
-            Choose photo
-          </Button>
-        </div>
-      ) : (
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {previewUrl && (
-            <div className="overflow-hidden rounded-lg border border-stone-200 bg-stone-50 p-3">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={previewUrl}
-                alt="Artwork preview"
-                className="mx-auto max-h-64 object-contain"
-              />
-            </div>
-          )}
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label htmlFor="title" className="mb-1.5 block text-sm text-stone-600">
-                Title
-              </label>
-              <Input
-                id="title"
-                value={title}
-                onChange={(e) => setTitle(e.target.value)}
-                required
-              />
-            </div>
-            <div>
-              <label htmlFor="medium" className="mb-1.5 block text-sm text-stone-600">
-                Medium
-              </label>
-              <Input
-                id="medium"
-                value={medium}
-                onChange={(e) => setMedium(e.target.value)}
-                placeholder="Oil on canvas"
-              />
-            </div>
-            <div>
-              <label htmlFor="year" className="mb-1.5 block text-sm text-stone-600">
-                Year
-              </label>
-              <Input
-                id="year"
-                type="number"
-                value={year}
-                onChange={(e) => setYear(e.target.value)}
-                placeholder="2026"
-              />
-            </div>
-            <div className="flex items-end">
-              <label className="flex min-h-11 items-center gap-2 text-sm text-stone-700">
-                <input
-                  type="checkbox"
-                  checked={published}
-                  onChange={(e) => setPublished(e.target.checked)}
-                  className="size-4 rounded border-stone-300 text-accent focus:ring-accent"
+            <span className="text-sm font-medium text-stone-900">Choose image to upload</span>
+            <span className="mt-1 text-xs text-stone-500">JPEG, PNG, or WebP</span>
+          </label>
+        ) : (
+          <>
+            {previewUrl && (
+              <div className="overflow-hidden rounded-lg border border-stone-200 bg-stone-50 p-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={previewUrl}
+                  alt="Artwork preview"
+                  className="mx-auto max-h-64 object-contain"
                 />
-                Publish immediately
-              </label>
-            </div>
-          </div>
+              </div>
+            )}
 
-          <div>
-            <label htmlFor="description" className="mb-1.5 block text-sm text-stone-600">
-              Description
-            </label>
-            <Textarea
-              id="description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              placeholder="Optional notes about this piece"
-            />
-          </div>
-
-          {error && <p className="text-sm text-red-600">{error}</p>}
-
-          <div className="flex flex-wrap gap-2">
-            <Button type="submit" disabled={loading}>
-              {loading ? "Uploading..." : "Upload"}
-            </Button>
             <Button type="button" variant="ghost" onClick={clearPhoto} disabled={loading}>
-              Change photo
+              Choose a different image
             </Button>
-          </div>
-        </form>
-      )}
+          </>
+        )}
 
-      {!file && error && <p className="text-sm text-red-600">{error}</p>}
+        <input
+          id={fileInputId}
+          type="file"
+          accept="image/jpeg,image/png,image/webp"
+          className="sr-only"
+          onChange={(event) => {
+            handleFileSelected(event.target.files?.[0]);
+            event.target.value = "";
+          }}
+        />
 
-      <input
-        ref={cameraInputRef}
-        type="file"
-        accept="image/*"
-        capture="environment"
-        className="hidden"
-        onChange={(event) => {
-          handleFileSelected(event.target.files?.[0]);
-          event.target.value = "";
-        }}
-      />
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept="image/jpeg,image/png,image/webp"
-        className="hidden"
-        onChange={(event) => {
-          handleFileSelected(event.target.files?.[0]);
-          event.target.value = "";
-        }}
-      />
+        {file && (
+          <>
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="title" className="mb-1.5 block text-sm text-stone-600">
+                  Title
+                </label>
+                <Input
+                  id="title"
+                  value={title}
+                  onChange={(e) => setTitle(e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <label htmlFor="medium" className="mb-1.5 block text-sm text-stone-600">
+                  Medium
+                </label>
+                <Input
+                  id="medium"
+                  value={medium}
+                  onChange={(e) => setMedium(e.target.value)}
+                  placeholder="Oil on canvas"
+                />
+              </div>
+              <div>
+                <label htmlFor="year" className="mb-1.5 block text-sm text-stone-600">
+                  Year
+                </label>
+                <Input
+                  id="year"
+                  type="number"
+                  value={year}
+                  onChange={(e) => setYear(e.target.value)}
+                  placeholder="2026"
+                />
+              </div>
+              <div className="flex items-end">
+                <label className="flex min-h-11 items-center gap-2 text-sm text-stone-700">
+                  <input
+                    type="checkbox"
+                    checked={published}
+                    onChange={(e) => setPublished(e.target.checked)}
+                    className="size-4 rounded border-stone-300 text-accent focus:ring-accent"
+                  />
+                  Publish immediately
+                </label>
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="description" className="mb-1.5 block text-sm text-stone-600">
+                Description
+              </label>
+              <Textarea
+                id="description"
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                placeholder="Optional notes about this piece"
+              />
+            </div>
+          </>
+        )}
+
+        {error && <p className="text-sm text-red-600">{error}</p>}
+
+        {file && (
+          <Button type="submit" disabled={loading} className="w-full sm:w-auto">
+            {loading ? "Uploading..." : "Upload to gallery"}
+          </Button>
+        )}
+      </form>
     </div>
   );
 }

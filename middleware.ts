@@ -42,8 +42,10 @@ export async function middleware(request: NextRequest) {
   const response = NextResponse.next();
   const session = await getSessionFromRequest(request, response);
 
-  if (pathname.startsWith("/admin") && pathname !== "/admin/login") {
-    if (!session.isLoggedIn) {
+  if (pathname.startsWith("/admin")) {
+    response.headers.set("Cache-Control", "no-store, no-cache, must-revalidate");
+
+    if (pathname !== "/admin/login" && !session.isLoggedIn) {
       const loginUrl = new URL("/admin/login", request.url);
       loginUrl.searchParams.set("from", pathname);
       return NextResponse.redirect(loginUrl);
