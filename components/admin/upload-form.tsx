@@ -1,14 +1,19 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useId, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
+const ALLOWED_IMAGE_TYPES = new Set(["image/jpeg", "image/png", "image/webp"]);
+
 export function UploadForm() {
   const router = useRouter();
   const fileInputId = useId();
+  const cameraInputId = useId();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
@@ -30,6 +35,11 @@ export function UploadForm() {
   function handleFileSelected(selected: File | undefined) {
     if (!selected) return;
 
+    if (!ALLOWED_IMAGE_TYPES.has(selected.type)) {
+      setError("Please choose a JPEG, PNG, or WebP image.");
+      return;
+    }
+
     setError("");
     setFile(selected);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
@@ -37,10 +47,49 @@ export function UploadForm() {
     if (!title) setTitle("Untitled artwork");
   }
 
+  async function chooseFromDevice() {
+    setError("");
+
+    if ("showOpenFilePicker" in window) {
+      try {
+        const picker = window.showOpenFilePicker as (options: {
+          multiple?: boolean;
+          types: Array<{
+            description: string;
+            accept: Record<string, string[]>;
+          }>;
+        }) => Promise<FileSystemFileHandle[]>;
+
+        const [handle] = await picker({
+          multiple: false,
+          types: [
+            {
+              description: "Images",
+              accept: {
+                "image/jpeg": [".jpg", ".jpeg"],
+                "image/png": [".png"],
+                "image/webp": [".webp"],
+              },
+            },
+          ],
+        });
+        const selected = await handle.getFile();
+        handleFileSelected(selected);
+        return;
+      } catch (pickerError) {
+        if (pickerError instanceof DOMException && pickerError.name === "AbortError") {
+          return;
+        }
+      }
+    }
+
+    fileInputRef.current?.click();
+  }
+
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!file) {
-      setError("Choose an image first");
+      setError("Take or choose a photo first");
       return;
     }
 
@@ -82,19 +131,31 @@ export function UploadForm() {
       <div>
         <h2 className="text-base font-medium text-stone-900">Upload artwork</h2>
         <p className="mt-1 text-sm text-stone-600">
-          Pick an image, add a title if you want, and upload it to the gallery.
+          Take a photo with your camera or pick an image from your device.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         {!file ? (
-          <label
-            htmlFor={fileInputId}
-            className="flex min-h-28 cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-stone-300 bg-stone-50 px-4 py-8 text-center transition-colors hover:border-accent hover:bg-accent/5"
-          >
-            <span className="text-sm font-medium text-stone-900">Choose image to upload</span>
-            <span className="mt-1 text-xs text-stone-500">JPEG, PNG, or WebP</span>
-          </label>
+          <div className="grid gap-3 sm:grid-cols-2">
+            <Button
+              type="button"
+              className="min-h-24 flex-col gap-1 py-6"
+              onClick={() => cameraInputRef.current?.click()}
+            >
+              <span>Take photo</span>
+              <span className="text-xs font-normal opacity-80">Opens your camera</span>
+            </Button>
+            <Button
+              type="button"
+              variant="secondary"
+              className="min-h-24 flex-col gap-1 py-6"
+              onClick={() => void chooseFromDevice()}
+            >
+              <span>Choose image</span>
+              <span className="text-xs font-normal opacity-80">From gallery or files</span>
+            </Button>
+          </div>
         ) : (
           <>
             {previewUrl && (
@@ -114,10 +175,27 @@ export function UploadForm() {
           </>
         )}
 
+        <p className="text-xs text-stone-500">
+          If Google Photos won&apos;t load, use Take photo or pick from Files in the chooser menu.
+        </p>
+
         <input
+          ref={cameraInputRef}
+          id={cameraInputId}
+          type="file"
+          accept="image/*"
+          capture="environment"
+          className="sr-only"
+          onChange={(event) => {
+            handleFileSelected(event.target.files?.[0]);
+            event.target.value = "";
+          }}
+        />
+        <input
+          ref={fileInputRef}
           id={fileInputId}
           type="file"
-          accept="image/jpeg,image/png,image/webp"
+          accept="*/*"
           className="sr-only"
           onChange={(event) => {
             handleFileSelected(event.target.files?.[0]);
