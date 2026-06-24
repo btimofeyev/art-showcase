@@ -88,15 +88,16 @@ export default async function ArtworkPage({ params }: PageProps) {
 
       <article className="mx-auto max-w-5xl px-4 pb-20 pt-6 sm:px-6 sm:pb-24 sm:pt-10">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1fr)_18rem] lg:items-start lg:gap-12">
-          <div className="relative aspect-[3/4] w-full overflow-hidden bg-line sm:aspect-[4/5] lg:aspect-auto lg:min-h-[34rem]">
+          <div className="overflow-hidden bg-line">
             <Image
               src={artwork.blob_url}
               alt={artwork.title}
-              fill
+              width={artwork.width ?? 1200}
+              height={artwork.height ?? 1500}
               priority
               quality={90}
               sizes="(max-width: 1024px) 100vw, 60vw"
-              className="object-contain"
+              className="h-auto w-full"
             />
           </div>
 

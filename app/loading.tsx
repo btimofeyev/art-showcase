@@ -1,3 +1,5 @@
+const SKELETON_HEIGHTS = ["h-48", "h-64", "h-56", "h-72", "h-52", "h-60", "h-44", "h-[17rem]"];
+
 export default function Loading() {
   return (
     <div className="min-h-full">
@@ -11,10 +13,12 @@ export default function Loading() {
       </div>
       <div className="mx-auto max-w-6xl px-4 py-8 sm:px-6">
         <div className="mb-8 h-8 w-40 animate-pulse rounded bg-line" />
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
-          <div className="col-span-2 row-span-2 aspect-[4/5] animate-pulse bg-line sm:min-h-[28rem]" />
-          {Array.from({ length: 4 }).map((_, index) => (
-            <div key={index} className="aspect-[4/5] animate-pulse bg-line" />
+        <div className="columns-2 gap-3 sm:columns-3 sm:gap-4 lg:columns-4 [column-gap:0.75rem] sm:[column-gap:1rem]">
+          {SKELETON_HEIGHTS.map((heightClass, index) => (
+            <div
+              key={index}
+              className={`mb-3 break-inside-avoid animate-pulse bg-line sm:mb-4 ${heightClass}`}
+            />
           ))}
         </div>
       </div>

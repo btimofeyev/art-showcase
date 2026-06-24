@@ -29,9 +29,6 @@ export function GalleryGrid({
     );
   }
 
-  const [featured, ...rest] = artworks;
-  const useFeaturedLayout = artworks.length >= 3;
-
   return (
     <section className="mx-auto max-w-6xl px-4 pb-20 pt-8 sm:px-6 sm:pb-24 sm:pt-10">
       <div className="mb-8 flex items-end justify-between gap-4">
@@ -43,37 +40,17 @@ export function GalleryGrid({
         </div>
       </div>
 
-      {useFeaturedLayout ? (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4 sm:gap-4">
+      <div className="columns-2 gap-3 sm:columns-3 sm:gap-4 lg:columns-4 [column-gap:0.75rem] sm:[column-gap:1rem]">
+        {artworks.map((artwork, index) => (
           <ArtworkCard
-            artwork={featured}
-            featured
-            index={0}
-            heartCount={heartCounts[featured.id] ?? 0}
-            className="col-span-2 row-span-2"
+            key={artwork.id}
+            artwork={artwork}
+            index={index}
+            heartCount={heartCounts[artwork.id] ?? 0}
+            className="mb-3 sm:mb-4"
           />
-          {rest.map((artwork, index) => (
-            <ArtworkCard
-              key={artwork.id}
-              artwork={artwork}
-              index={index + 1}
-              heartCount={heartCounts[artwork.id] ?? 0}
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 sm:gap-4 lg:grid-cols-4">
-          {artworks.map((artwork, index) => (
-            <ArtworkCard
-              key={artwork.id}
-              artwork={artwork}
-              featured={index === 0 && artworks.length === 1}
-              index={index}
-              heartCount={heartCounts[artwork.id] ?? 0}
-            />
-          ))}
-        </div>
-      )}
+        ))}
+      </div>
     </section>
   );
 }
