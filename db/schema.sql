@@ -17,13 +17,17 @@ CREATE TABLE IF NOT EXISTS artworks (
 -- site_settings: single-row artist profile
 CREATE TABLE IF NOT EXISTS site_settings (
   id INT PRIMARY KEY DEFAULT 1 CHECK (id = 1),
-  artist_name TEXT NOT NULL DEFAULT 'Artist',
+  artist_name TEXT NOT NULL DEFAULT 'Magdalena',
   tagline TEXT,
   bio TEXT
 );
 
-INSERT INTO site_settings (artist_name)
-VALUES ('Artist')
+INSERT INTO site_settings (artist_name, tagline, bio)
+VALUES (
+  'Magdalena',
+  'Original art — sketches, paintings, and whatever I''m making next.',
+  'Hi, I''m Magdalena. This is my space to share work with family and friends. If something catches your eye, leave a heart or say hello in the comments.'
+)
 ON CONFLICT (id) DO NOTHING;
 
 -- hearts: one per visitor per artwork

@@ -127,6 +127,7 @@ export default async function ArtworkPage({ params }: PageProps) {
 
         <ArtworkFeedbackPanel
           artworkId={artwork.id}
+          artistName={settings.artist_name}
           initialFeedback={feedback}
         />
       </article>

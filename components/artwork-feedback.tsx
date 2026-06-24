@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea";
 
 type ArtworkFeedbackPanelProps = {
   artworkId: string;
+  artistName: string;
   initialFeedback: ArtworkFeedback;
 };
 
@@ -26,6 +27,7 @@ function formatRelativeTime(value: string) {
 
 export function ArtworkFeedbackPanel({
   artworkId,
+  artistName,
   initialFeedback,
 }: ArtworkFeedbackPanelProps) {
   const [feedback, setFeedback] = useState(initialFeedback);
@@ -96,7 +98,7 @@ export function ArtworkFeedbackPanel({
     <section className="mt-10 border-t border-line pt-8">
       <span className="label-caps text-muted">Feedback</span>
       <h2 className="mt-2 font-display text-xl font-bold tracking-tight text-foreground">
-        Show some love
+        Show {artistName} some love
       </h2>
 
       <div className="mt-5 flex items-center gap-4">
@@ -137,7 +139,7 @@ export function ArtworkFeedbackPanel({
             ? "Be the first to leave a heart"
             : feedback.heart_count === 1
               ? "1 person loves this"
-              : `${feedback.heart_count} people love this`}
+              : `${feedback.heart_count} people love this piece`}
         </p>
       </div>
 
@@ -146,7 +148,7 @@ export function ArtworkFeedbackPanel({
 
         {feedback.comments.length === 0 ? (
           <p className="mt-3 text-sm text-muted">
-            No comments yet. Say something nice.
+            No comments yet. Be the first to tell {artistName} what you think.
           </p>
         ) : (
           <ul className="mt-4 space-y-4">

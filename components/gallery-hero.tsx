@@ -25,7 +25,7 @@ export function GalleryHero({ settings, artworkCount }: GalleryHeroProps) {
 
       <div className="relative mx-auto max-w-6xl px-4 pb-10 pt-8 sm:px-6 sm:pb-14 sm:pt-12">
         <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-          <span className="label-caps text-muted">Portfolio</span>
+          <span className="label-caps text-muted">{settings.artist_name}&apos;s studio</span>
           {artworkCount > 0 && (
             <>
               <span className="text-line" aria-hidden>
@@ -58,7 +58,7 @@ export function GalleryHero({ settings, artworkCount }: GalleryHeroProps) {
               className="inline-flex min-h-11 items-center gap-2 text-sm font-medium text-accent sm:hidden"
               aria-expanded={bioOpen}
             >
-              {bioOpen ? "Hide about" : "About the artist"}
+              {bioOpen ? "Hide about" : `About ${settings.artist_name}`}
               <svg
                 width="14"
                 height="14"

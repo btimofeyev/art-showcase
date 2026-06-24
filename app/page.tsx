@@ -18,11 +18,15 @@ export default async function HomePage() {
   return (
     <div className="min-h-full">
       <GalleryHero settings={settings} artworkCount={artworks.length} />
-      <GalleryGrid artworks={artworks} heartCounts={heartCounts} />
+      <GalleryGrid
+        artworks={artworks}
+        heartCounts={heartCounts}
+        artistName={settings.artist_name}
+      />
       <footer className="border-t border-line py-8">
         <div className="mx-auto max-w-6xl px-4 sm:px-6">
           <p className="label-caps text-muted">
-            {settings.artist_name} · personal portfolio
+            {settings.artist_name} · shared with family &amp; friends
           </p>
         </div>
       </footer>

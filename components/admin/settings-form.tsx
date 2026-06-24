@@ -71,7 +71,7 @@ export function SettingsForm({ settings: initialSettings }: SettingsFormProps) {
           onChange={(e) =>
             setSettings({ ...settings, tagline: e.target.value || null })
           }
-          placeholder="Paintings & sketches"
+          placeholder="Original art — sketches, paintings, and more"
         />
       </div>
 
@@ -85,7 +85,7 @@ export function SettingsForm({ settings: initialSettings }: SettingsFormProps) {
           onChange={(e) =>
             setSettings({ ...settings, bio: e.target.value || null })
           }
-          placeholder="A short introduction for visitors"
+          placeholder="A short note for family and friends visiting your gallery"
         />
       </div>
 

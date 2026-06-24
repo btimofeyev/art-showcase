@@ -6,9 +6,9 @@ export default function AdminLoginPage() {
     <div className="flex min-h-full items-center justify-center px-4 py-12">
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="font-serif text-3xl text-stone-900">Admin</h1>
+          <h1 className="font-display text-3xl font-bold text-stone-900">Magdalena&apos;s studio</h1>
           <p className="mt-2 text-sm text-stone-600">
-            Sign in to upload and manage artwork.
+            Sign in to upload and manage your work.
           </p>
         </div>
         <div className="rounded-xl border border-stone-200 bg-white p-5">

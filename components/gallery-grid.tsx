@@ -4,19 +4,25 @@ import { ArtworkCard } from "./artwork-card";
 type GalleryGridProps = {
   artworks: Artwork[];
   heartCounts?: Record<string, number>;
+  artistName?: string;
 };
 
-export function GalleryGrid({ artworks, heartCounts = {} }: GalleryGridProps) {
+export function GalleryGrid({
+  artworks,
+  heartCounts = {},
+  artistName = "Magdalena",
+}: GalleryGridProps) {
   if (artworks.length === 0) {
     return (
       <div className="mx-auto max-w-6xl px-4 py-20 sm:px-6">
         <div className="mx-auto max-w-md text-center">
           <div className="accent-rule mx-auto" />
           <p className="mt-6 font-display text-2xl font-bold tracking-tight text-foreground">
-            Nothing here yet
+            {artistName}&apos;s gallery is just getting started
           </p>
           <p className="mt-3 text-sm leading-relaxed text-muted sm:text-base">
-            New work lands here once it&apos;s published. Check back soon.
+            New pieces will show up here soon. Come back to see what she&apos;s
+            been working on.
           </p>
         </div>
       </div>
@@ -32,7 +38,7 @@ export function GalleryGrid({ artworks, heartCounts = {} }: GalleryGridProps) {
         <div>
           <span className="label-caps text-muted">Gallery</span>
           <h2 className="mt-2 font-display text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
-            Selected work
+            {artistName}&apos;s work
           </h2>
         </div>
       </div>

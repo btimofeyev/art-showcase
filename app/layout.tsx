@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { DM_Sans, Syne } from "next/font/google";
+import { SITE } from "@/lib/site";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -15,10 +16,15 @@ const syne = Syne({
 
 export const metadata: Metadata = {
   title: {
-    default: "Art Showcase",
-    template: "%s · Art Showcase",
+    default: SITE.siteTitle,
+    template: `%s · ${SITE.siteTitle}`,
   },
-  description: "A personal gallery to share artwork with family and friends.",
+  description: SITE.siteDescription,
+  openGraph: {
+    title: SITE.siteTitle,
+    description: SITE.siteDescription,
+    type: "website",
+  },
 };
 
 export const viewport: Viewport = {

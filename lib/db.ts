@@ -1,5 +1,6 @@
 import { sql } from "@vercel/postgres";
 import type { Artwork, SiteSettings } from "./types";
+import { SITE } from "./site";
 
 function mapArtwork(row: Record<string, unknown>): Artwork {
   return {
@@ -170,9 +171,9 @@ export async function getSiteSettings(): Promise<SiteSettings> {
 
   return {
     id: 1,
-    artist_name: "Artist",
-    tagline: null,
-    bio: null,
+    artist_name: SITE.artistName,
+    tagline: SITE.tagline,
+    bio: SITE.bio,
   };
 }
 

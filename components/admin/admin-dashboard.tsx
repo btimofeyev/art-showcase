@@ -38,8 +38,8 @@ export function AdminDashboard({ artworks, settings, comments }: AdminDashboardP
       <header className="sticky top-0 z-10 border-b border-stone-200 bg-canvas/95 backdrop-blur-sm">
         <div className="mx-auto flex max-w-3xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
           <div>
-            <h1 className="font-serif text-2xl text-stone-900">Admin</h1>
-            <p className="text-sm text-stone-600">Manage your gallery</p>
+            <h1 className="font-display text-2xl font-bold text-stone-900">Magdalena&apos;s studio</h1>
+            <p className="text-sm text-stone-600">Upload and manage your gallery</p>
           </div>
           <div className="flex items-center gap-2">
             <Link href="/" className="min-h-11 inline-flex items-center text-sm text-accent">
