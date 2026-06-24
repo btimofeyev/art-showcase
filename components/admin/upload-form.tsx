@@ -3,13 +3,11 @@
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
 import { CameraCapture } from "@/components/admin/camera-capture";
-import { PerspectiveCropper } from "@/components/admin/perspective-cropper";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import { loadImageFromBlob, loadImageFromFile } from "@/lib/warp-quad";
 
-type Step = "choose" | "camera" | "crop" | "details";
+type Step = "choose" | "camera" | "details";
 
 export function UploadForm() {
   const router = useRouter();
@@ -17,7 +15,6 @@ export function UploadForm() {
   const libraryInputRef = useRef<HTMLInputElement>(null);
 
   const [step, setStep] = useState<Step>("choose");
-  const [sourceImage, setSourceImage] = useState<HTMLImageElement | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [title, setTitle] = useState("");
@@ -31,51 +28,34 @@ export function UploadForm() {
 
   function resetFlow() {
     setStep("choose");
-    setSourceImage(null);
     setFile(null);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
     setError("");
   }
 
-  async function beginCropWithFile(selected: File) {
-    setError("");
-    try {
-      const image = await loadImageFromFile(selected);
-      setSourceImage(image);
-      setStep("crop");
-    } catch {
-      setError("Could not load that image.");
-    }
-  }
+  function proceedToDetails(input: Blob | File) {
+    const uploadFile =
+      input instanceof File
+        ? input
+        : new File([input], `capture-${Date.now()}.jpg`, { type: "image/jpeg" });
 
-  async function beginCropWithBlob(blob: Blob) {
-    setError("");
-    try {
-      const image = await loadImageFromBlob(blob);
-      setSourceImage(image);
-      setStep("crop");
-    } catch {
-      setError("Could not load the captured photo.");
-    }
-  }
-
-  function handleScannedBlob(blob: Blob) {
-    const scannedFile = new File([blob], `scan-${Date.now()}.jpg`, {
-      type: "image/jpeg",
-    });
-    setFile(scannedFile);
+    setFile(uploadFile);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(URL.createObjectURL(blob));
+    setPreviewUrl(URL.createObjectURL(uploadFile));
     if (!title) setTitle("Untitled artwork");
-    setSourceImage(null);
     setStep("details");
+  }
+
+  function handleFileSelected(selected: File) {
+    setError("");
+    proceedToDetails(selected);
   }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!file) {
-      setError("Scan or choose an image first");
+      setError("Capture or choose an image first");
       return;
     }
 
@@ -117,7 +97,7 @@ export function UploadForm() {
       <div>
         <h2 className="text-base font-medium text-stone-900">Upload artwork</h2>
         <p className="mt-1 text-sm text-stone-600">
-          Scan flat artwork with your camera, then crop to remove the background.
+          Capture artwork with your camera or choose a photo from your library.
         </p>
       </div>
 
@@ -146,7 +126,7 @@ export function UploadForm() {
               event.preventDefault();
               setDragging(false);
               const dropped = event.dataTransfer.files[0];
-              if (dropped) void beginCropWithFile(dropped);
+              if (dropped) handleFileSelected(dropped);
             }}
             className={`hidden rounded-lg border-2 border-dashed px-4 py-8 text-center transition-colors sm:block ${
               dragging ? "border-accent bg-accent/5" : "border-stone-300"
@@ -159,7 +139,7 @@ export function UploadForm() {
               className="hidden"
               onChange={(event) => {
                 const selected = event.target.files?.[0];
-                if (selected) void beginCropWithFile(selected);
+                if (selected) handleFileSelected(selected);
               }}
             />
             <button
@@ -178,7 +158,7 @@ export function UploadForm() {
             className="hidden"
             onChange={(event) => {
               const selected = event.target.files?.[0];
-              if (selected) void beginCropWithFile(selected);
+              if (selected) handleFileSelected(selected);
               event.target.value = "";
             }}
           />
@@ -187,19 +167,8 @@ export function UploadForm() {
 
       {step === "camera" && (
         <CameraCapture
-          onCapture={(blob) => void beginCropWithBlob(blob)}
+          onCapture={(blob) => proceedToDetails(blob)}
           onCancel={() => setStep("choose")}
-        />
-      )}
-
-      {step === "crop" && sourceImage && (
-        <PerspectiveCropper
-          image={sourceImage}
-          onConfirm={handleScannedBlob}
-          onCancel={() => {
-            setSourceImage(null);
-            setStep("choose");
-          }}
         />
       )}
 
@@ -210,7 +179,7 @@ export function UploadForm() {
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={previewUrl}
-                alt="Scanned artwork preview"
+                alt="Artwork preview"
                 className="mx-auto max-h-64 object-contain"
               />
             </div>

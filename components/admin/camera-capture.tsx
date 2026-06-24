@@ -89,7 +89,7 @@ export function CameraCapture({ onCapture, onCancel }: CameraCaptureProps) {
       </div>
 
       <p className="text-sm text-stone-600">
-        Fill the frame with the artwork. You&apos;ll crop out the background next.
+        Fill the frame with the artwork, then tap Capture.
       </p>
 
       <div className="flex flex-wrap gap-2">
