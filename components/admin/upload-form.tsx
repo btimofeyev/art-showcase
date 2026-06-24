@@ -2,19 +2,15 @@
 
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
-import { CameraCapture } from "@/components/admin/camera-capture";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 
-type Step = "choose" | "camera" | "details";
-
 export function UploadForm() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const libraryInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
 
-  const [step, setStep] = useState<Step>("choose");
   const [file, setFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [title, setTitle] = useState("");
@@ -22,40 +18,30 @@ export function UploadForm() {
   const [medium, setMedium] = useState("");
   const [year, setYear] = useState("");
   const [published, setPublished] = useState(true);
-  const [dragging, setDragging] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  function resetFlow() {
-    setStep("choose");
+  function clearPhoto() {
     setFile(null);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
     setPreviewUrl(null);
     setError("");
   }
 
-  function proceedToDetails(input: Blob | File) {
-    const uploadFile =
-      input instanceof File
-        ? input
-        : new File([input], `capture-${Date.now()}.jpg`, { type: "image/jpeg" });
+  function handleFileSelected(selected: File | undefined) {
+    if (!selected) return;
 
-    setFile(uploadFile);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(URL.createObjectURL(uploadFile));
-    if (!title) setTitle("Untitled artwork");
-    setStep("details");
-  }
-
-  function handleFileSelected(selected: File) {
     setError("");
-    proceedToDetails(selected);
+    setFile(selected);
+    if (previewUrl) URL.revokeObjectURL(previewUrl);
+    setPreviewUrl(URL.createObjectURL(selected));
+    if (!title) setTitle("Untitled artwork");
   }
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     if (!file) {
-      setError("Capture or choose an image first");
+      setError("Choose or take a photo first");
       return;
     }
 
@@ -82,7 +68,7 @@ export function UploadForm() {
       return;
     }
 
-    resetFlow();
+    clearPhoto();
     setTitle("");
     setDescription("");
     setMedium("");
@@ -97,82 +83,24 @@ export function UploadForm() {
       <div>
         <h2 className="text-base font-medium text-stone-900">Upload artwork</h2>
         <p className="mt-1 text-sm text-stone-600">
-          Capture artwork with your camera or choose a photo from your library.
+          Take a photo or choose one from your library, then share it to the gallery.
         </p>
       </div>
 
-      {step === "choose" && (
-        <>
-          <div className="grid gap-3 sm:grid-cols-2">
-            <Button type="button" onClick={() => setStep("camera")}>
-              Scan with camera
-            </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              onClick={() => libraryInputRef.current?.click()}
-            >
-              Choose photo
-            </Button>
-          </div>
-
-          <div
-            onDragOver={(event) => {
-              event.preventDefault();
-              setDragging(true);
-            }}
-            onDragLeave={() => setDragging(false)}
-            onDrop={(event) => {
-              event.preventDefault();
-              setDragging(false);
-              const dropped = event.dataTransfer.files[0];
-              if (dropped) handleFileSelected(dropped);
-            }}
-            className={`hidden rounded-lg border-2 border-dashed px-4 py-8 text-center transition-colors sm:block ${
-              dragging ? "border-accent bg-accent/5" : "border-stone-300"
-            }`}
+      {!file ? (
+        <div className="grid gap-3 sm:grid-cols-2">
+          <Button type="button" onClick={() => cameraInputRef.current?.click()}>
+            Take photo
+          </Button>
+          <Button
+            type="button"
+            variant="secondary"
+            onClick={() => fileInputRef.current?.click()}
           >
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              className="hidden"
-              onChange={(event) => {
-                const selected = event.target.files?.[0];
-                if (selected) handleFileSelected(selected);
-              }}
-            />
-            <button
-              type="button"
-              onClick={() => fileInputRef.current?.click()}
-              className="text-sm text-stone-700"
-            >
-              Or drop an image here
-            </button>
-          </div>
-
-          <input
-            ref={libraryInputRef}
-            type="file"
-            accept="image/jpeg,image/png,image/webp"
-            className="hidden"
-            onChange={(event) => {
-              const selected = event.target.files?.[0];
-              if (selected) handleFileSelected(selected);
-              event.target.value = "";
-            }}
-          />
-        </>
-      )}
-
-      {step === "camera" && (
-        <CameraCapture
-          onCapture={(blob) => proceedToDetails(blob)}
-          onCancel={() => setStep("choose")}
-        />
-      )}
-
-      {step === "details" && (
+            Choose photo
+          </Button>
+        </div>
+      ) : (
         <form onSubmit={handleSubmit} className="space-y-4">
           {previewUrl && (
             <div className="overflow-hidden rounded-lg border border-stone-200 bg-stone-50 p-3">
@@ -251,16 +179,36 @@ export function UploadForm() {
             <Button type="submit" disabled={loading}>
               {loading ? "Uploading..." : "Upload"}
             </Button>
-            <Button type="button" variant="ghost" onClick={resetFlow}>
-              Start over
+            <Button type="button" variant="ghost" onClick={clearPhoto} disabled={loading}>
+              Change photo
             </Button>
           </div>
         </form>
       )}
 
-      {step === "choose" && error && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
+      {!file && error && <p className="text-sm text-red-600">{error}</p>}
+
+      <input
+        ref={cameraInputRef}
+        type="file"
+        accept="image/*"
+        capture="environment"
+        className="hidden"
+        onChange={(event) => {
+          handleFileSelected(event.target.files?.[0]);
+          event.target.value = "";
+        }}
+      />
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        className="hidden"
+        onChange={(event) => {
+          handleFileSelected(event.target.files?.[0]);
+          event.target.value = "";
+        }}
+      />
     </div>
   );
 }
