@@ -39,3 +39,8 @@ export type ArtworkFeedback = {
 };
 
 export type ArtworkHeartCounts = Record<string, number>;
+
+export type ArtworkNavLink = {
+  id: string;
+  title: string;
+};

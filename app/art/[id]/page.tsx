@@ -3,7 +3,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { ArtworkFeedbackPanel } from "@/components/artwork-feedback";
-import { getPublishedArtworkById, getSiteSettings } from "@/lib/db";
+import { ArtworkNavigation } from "@/components/artwork-navigation";
+import {
+  getAdjacentPublishedArtworks,
+  getPublishedArtworkById,
+  getSiteSettings,
+} from "@/lib/db";
 import { getArtworkFeedback } from "@/lib/feedback";
 import { getVisitorKey } from "@/lib/visitor";
 
@@ -49,10 +54,11 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function ArtworkPage({ params }: PageProps) {
   const { id } = await params;
-  const [artwork, settings, visitorKey] = await Promise.all([
+  const [artwork, settings, visitorKey, adjacent] = await Promise.all([
     getPublishedArtworkById(id),
     getSiteSettings(),
     getVisitorKey(),
+    getAdjacentPublishedArtworks(id),
   ]);
 
   if (!artwork) {
@@ -125,6 +131,8 @@ export default async function ArtworkPage({ params }: PageProps) {
             </Link>
           </div>
         </div>
+
+        <ArtworkNavigation previous={adjacent.previous} next={adjacent.next} />
 
         <ArtworkFeedbackPanel
           artworkId={artwork.id}

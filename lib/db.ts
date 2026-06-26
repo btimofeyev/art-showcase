@@ -1,5 +1,5 @@
 import { sql } from "@vercel/postgres";
-import type { Artwork, SiteSettings } from "./types";
+import type { Artwork, ArtworkNavLink, SiteSettings } from "./types";
 import { SITE } from "./site";
 
 function mapArtwork(row: Record<string, unknown>): Artwork {
@@ -52,6 +52,32 @@ export async function getPublishedArtworkById(
     LIMIT 1
   `;
   return rows[0] ? mapArtwork(rows[0]) : null;
+}
+
+export async function getAdjacentPublishedArtworks(id: string): Promise<{
+  previous: ArtworkNavLink | null;
+  next: ArtworkNavLink | null;
+}> {
+  const { rows } = await sql`
+    SELECT id, title FROM artworks
+    WHERE published = true
+    ORDER BY sort_order ASC, created_at DESC
+  `;
+
+  const artworks: ArtworkNavLink[] = rows.map((row) => ({
+    id: String(row.id),
+    title: String(row.title),
+  }));
+
+  const index = artworks.findIndex((artwork) => artwork.id === id);
+  if (index === -1) {
+    return { previous: null, next: null };
+  }
+
+  return {
+    previous: index > 0 ? artworks[index - 1] : null,
+    next: index < artworks.length - 1 ? artworks[index + 1] : null,
+  };
 }
 
 export async function getNextSortOrder(): Promise<number> {
